@@ -1,0 +1,76 @@
+import java.util.Properties
+
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+// Safely pull local key configurations
+Properties localProperties = new Properties()
+File localPropertiesFile = project.rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { stream ->
+        localProperties.load(stream)
+    }
+}
+String geminiApiKey = localProperties.getProperty('GEMINI_API_KEY', '')
+
+android {
+    namespace 'com.example.stockapp'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.example.stockapp"
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // Injecting Gemini Key safely into BuildConfig
+        buildConfigField "String", "GEMINI_API_KEY", "\"${geminiApiKey}\""
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    // --- CORE ANDROID LIBRARIES ---
+    implementation libs.appcompat
+    implementation libs.activity
+    implementation libs.constraintlayout
+    implementation 'com.google.android.material:material:1.12.0'
+
+    // --- NETWORKING & BACKEND SOCKETS ---
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'org.java-websocket:Java-WebSocket:1.5.7'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+
+    // --- REALTIME DATA VISUALIZATION ENGINE ---
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    implementation 'com.airbnb.android:lottie:6.4.0'
+
+    // --- GEMINI CORE DESERIALIZER SYSTEM ---
+    implementation "com.google.ai.client.generativeai:generativeai:0.9.0"
+    implementation "com.google.guava:guava:33.0.0-android"
+
+    // --- TESTING MATRICES ---
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+}
